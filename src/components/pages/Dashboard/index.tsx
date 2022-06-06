@@ -77,6 +77,7 @@ const DashboardPage = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [employees, setEmployees] = useState([]);
+  const [employee, setEmployee] = useState(undefined);
   const [totalEmployeeCount, setTotalEmployeeCount] = useState(0);
   const [openModal, setOpenModal] = useState(false);
 
@@ -108,6 +109,12 @@ const DashboardPage = () => {
   };
 
   const handleOpenModal = () => {
+    setEmployee(undefined);
+    setOpenModal(true);
+  }
+
+  const handleOpenEditModal = (index: number) => {
+    setEmployee(employees[index]);
     setOpenModal(true);
   }
 
@@ -168,10 +175,10 @@ const DashboardPage = () => {
                 .map((employee, index) => {
                   return (
                     <TableRow hover role="checkbox" tabIndex={-1} key={index}>
-                      {columns.map((column) => {
+                      {columns.map((column, idx) => {
                         return (
                           <TableCell key={column.id} align="center">
-                            {column.id === 'action' ? (<Stack direction="row" spacing={2}><Button variant="contained" startIcon={<EditIcon />} onClick={() => handleOpenModal()} >
+                            {column.id === 'action' ? (<Stack direction="row" spacing={2}><Button variant="contained" startIcon={<EditIcon />} onClick={() => handleOpenEditModal(index)} >
                               Edit
                             </Button><Button variant="contained" startIcon={<DeleteIcon />} onClick={() => handleDelete(employee["_id"])} color="error" >
                                 Delete
@@ -195,7 +202,7 @@ const DashboardPage = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
-      <InsertModal openModal={openModal} handleCloseModal={() => handleCloseModal()} />
+      <InsertModal openModal={openModal} employee={employee} handleCloseModal={() => handleCloseModal()} />
     </Box>
   );
 };

@@ -32,24 +32,11 @@ const style = {
 
 type ModalPropsType = {
     openModal: boolean,
+    employee: any,
     handleCloseModal: any
 }
 
-const InsertModal = ({ openModal, handleCloseModal }: ModalPropsType) => {
-
-    const defaultValues = {
-        name: "",
-        email: "",
-        phoneNumber: "",
-        homeAddress: {
-            city: "",
-            zipCode: "",
-            addressLine1: "",
-            addressLine2: "",
-        },
-        dateOfEmployment: null,
-        dateOfBirth: null
-    };
+const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) => {
 
     const testData = {
         dateOfBirth: "2022-06-14T22:00:00.000Z",
@@ -65,8 +52,27 @@ const InsertModal = ({ openModal, handleCloseModal }: ModalPropsType) => {
         phoneNumber: "+19292056099",
     };
 
-    const [formValues, setFormValues] = useState(defaultValues);
+    const defaultValue = {
+        name: "",
+        email: "",
+        phoneNumber: "",
+        homeAddress: {
+            city: "",
+            ZIPCode: "",
+            addressLine1: "",
+            addressLine2: "",
+        },
+        dateOfEmployment: null,
+        dateOfBirth: null
+    };
+
+    const [formValues, setFormValues] = useState(defaultValue);
     const [openSnake, setOpenSnake] = React.useState(false);
+
+    useEffect(() => {
+        employee !== undefined ? setFormValues(employee) : setFormValues(defaultValue);
+    }, [employee])
+
     const handleInputChange = (e: any) => {
         const { name, value } = e.target;
         if (name !== "name" && name !== "email" && name !== "phoneNumber") {
@@ -100,14 +106,19 @@ const InsertModal = ({ openModal, handleCloseModal }: ModalPropsType) => {
 
     const handleSubmit = async (event: any) => {
 
-        const config: AxiosRequestConfig = {
+        const config: AxiosRequestConfig = employee !== undefined ? {
+            method: "patch",
+            url: 'http://142.132.229.249:3000/employees/' + employee._id,
+            data: formValues,
+        } : {
             method: "post",
             url: 'http://142.132.229.249:3000/employees',
             data: testData,
         };
 
+        console.log(config);
+
         event.preventDefault();
-        console.log("dd", formValues);
         await axios(config).then((res) => {
             if (res.data.success) {
                 setOpenSnake(true);
@@ -156,7 +167,7 @@ const InsertModal = ({ openModal, handleCloseModal }: ModalPropsType) => {
                                         id="phoneNumber-input"
                                         name="phoneNumber"
                                         label="Phone Number"
-                                        type="number"
+                                        type="text"
                                         value={formValues.phoneNumber}
                                         onChange={handleInputChange}
                                     />
@@ -177,7 +188,7 @@ const InsertModal = ({ openModal, handleCloseModal }: ModalPropsType) => {
                                         name="zipCode"
                                         label="ZIPCode"
                                         type="text"
-                                        value={formValues.homeAddress.zipCode}
+                                        value={formValues.homeAddress.ZIPCode}
                                         onChange={handleInputChange}
                                     />
                                 </Grid>
