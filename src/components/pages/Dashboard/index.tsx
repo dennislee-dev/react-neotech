@@ -14,7 +14,10 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
-import InsertModal from "../reusable/Modal";
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Stack } from "@mui/material";
+import InsertModal from "../reusable/InsertModal";
 
 const columns = [
   { id: 'name', label: 'Name', minWidth: 100 },
@@ -61,6 +64,12 @@ const columns = [
     minWidth: 100,
     align: 'right'
   },
+  {
+    id: 'action',
+    label: 'Action',
+    minwidth: 150,
+    algin: 'center'
+  }
 ];
 
 const DashboardPage = () => {
@@ -68,20 +77,22 @@ const DashboardPage = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [employees, setEmployees] = useState([]);
-  const [openModal, setOpenModal] = useState(false); 
+  const [totalEmployeeCount, setTotalEmployeeCount] = useState(0);
+  const [openModal, setOpenModal] = useState(false);
 
   useEffect(() => {
 
-    const config:AxiosRequestConfig = {
+    const config: AxiosRequestConfig = {
       method: "get",
       url: 'http://142.132.229.249:3000/employees',
       data: { page: page, limit: rowsPerPage },
     };
 
-    const getEmployees = async () : Promise<void> => {
+    const getEmployees = async (): Promise<void> => {
       await axios(config).then((res) => {
+        console.log(res);
         setEmployees(res.data.employees);
-        console.log("RES", res);
+        setTotalEmployeeCount(res.data.count);
       });
     }
     getEmployees();
@@ -104,6 +115,22 @@ const DashboardPage = () => {
     setOpenModal(true);
   }
 
+  const handleDelete = (id: string) => {
+    if(window.confirm("Do you want to delete this employee?")) {
+      const config: AxiosRequestConfig = {
+        method: "delete",
+        url: 'http://142.132.229.249:3000/employees/soft-delete/' + id,
+      };
+  
+      const softDeleteEmployees = async (): Promise<void> => {
+        await axios(config).then((res) => {
+          console.log(res);
+        });
+      }
+      softDeleteEmployees();
+    }
+  }
+
   return (
     <Box sx={{ backgroundColor: '#ebebeb', height: '100vh' }}>
       <AppBar position="static">
@@ -115,11 +142,11 @@ const DashboardPage = () => {
         </Toolbar>
       </AppBar>
       <Box sx={{ width: '80%', margin: '50px auto 0', textAlign: 'right' }}>
-      <Button variant="contained" startIcon={<GroupAddIcon />} onClick={() => handleOpenModal()} >
+        <Button variant="contained" startIcon={<GroupAddIcon />} onClick={() => handleOpenModal()} color="success" >
           New Employee
-      </Button>
+        </Button>
       </Box>
-      
+
       <Paper sx={{ width: '80%', overflow: 'hidden', margin: '30px auto' }}>
         <TableContainer>
           <Table stickyHeader aria-label="sticky table">
@@ -141,14 +168,18 @@ const DashboardPage = () => {
                 .map((employee, index) => {
                   return (
                     <TableRow hover role="checkbox" tabIndex={-1} key={index}>
-                    {columns.map((column) => {
-                      return (
-                        <TableCell key={column.id} align="center">
-                          {employee[column.id] === null ? employee["homeAddress"][column.id] : employee[column.id]}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
+                      {columns.map((column) => {
+                        return (
+                          <TableCell key={column.id} align="center">
+                            {column.id === 'action' ? (<Stack direction="row" spacing={2}><Button variant="contained" startIcon={<EditIcon />} onClick={() => handleOpenModal()} >
+                              Edit
+                            </Button><Button variant="contained" startIcon={<DeleteIcon />} onClick={() => handleDelete(employee["_id"])} color="error" >
+                                Delete
+                              </Button></Stack>) : employee[column.id] === undefined ? employee["homeAddress"][column.id] : employee[column.id]}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
                   );
                 })}
             </TableBody>
@@ -157,7 +188,7 @@ const DashboardPage = () => {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={employees.length}
+          count={totalEmployeeCount}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
