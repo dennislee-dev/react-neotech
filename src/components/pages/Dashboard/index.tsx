@@ -19,6 +19,10 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { Stack } from "@mui/material";
 import InsertModal from "../reusable/InsertModal";
 
+type DashboardPropType = {
+  deleted: boolean
+}
+
 const columns = [
   { id: 'name', label: 'Name', minWidth: 100 },
   { id: 'email', label: 'Email', minWidth: 100 },
@@ -72,7 +76,7 @@ const columns = [
   }
 ];
 
-const DashboardPage = () => {
+const DashboardPage = ({ deleted }: DashboardPropType) => {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -83,15 +87,20 @@ const DashboardPage = () => {
 
   useEffect(() => {
 
-    const config: AxiosRequestConfig = {
+    console.log(window.location.href);
+
+    const config: AxiosRequestConfig = !deleted ? {
       method: "get",
       url: 'http://142.132.229.249:3000/employees',
+      data: { page: page, limit: rowsPerPage },
+    } : {
+      method: "get",
+      url: 'http://142.132.229.249:3000/employees/deleted',
       data: { page: page, limit: rowsPerPage },
     };
 
     const getEmployees = async (): Promise<void> => {
       await axios(config).then((res) => {
-        console.log(res);
         setEmployees(res.data.employees);
         setTotalEmployeeCount(res.data.count);
       });
@@ -119,16 +128,19 @@ const DashboardPage = () => {
   }
 
   const handleCloseModal = () => {
-    setOpenModal(true);
+    setOpenModal(false);
   }
 
   const handleDelete = (id: string) => {
-    if(window.confirm("Do you want to delete this employee?")) {
-      const config: AxiosRequestConfig = {
+    if (window.confirm("Do you want to delete this employee?")) {
+      const config: AxiosRequestConfig = !deleted ? {
         method: "delete",
         url: 'http://142.132.229.249:3000/employees/soft-delete/' + id,
+      } : {
+        method: "delete",
+        url: 'http://142.132.229.249:3000/employees/permanent-delete/' + id,
       };
-  
+
       const softDeleteEmployees = async (): Promise<void> => {
         await axios(config).then((res) => {
           console.log(res);
@@ -145,16 +157,18 @@ const DashboardPage = () => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Dashboard
           </Typography>
-          <Button color="inherit">Login</Button>
+          <Button color="inherit" onClick={() => window.location.href = "/"}>Employees</Button>
+          <Button color="inherit" onClick={() => window.location.href = "/deleted-employees"}>Deleted Employees</Button>
         </Toolbar>
       </AppBar>
-      <Box sx={{ width: '80%', margin: '50px auto 0', textAlign: 'right' }}>
+      {!deleted && (<Box sx={{ width: '80%', margin: '50px auto 0', textAlign: 'right' }}>
         <Button variant="contained" startIcon={<GroupAddIcon />} onClick={() => handleOpenModal()} color="success" >
           New Employee
         </Button>
-      </Box>
+      </Box>)}
 
-      <Paper sx={{ width: '80%', overflow: 'hidden', margin: '30px auto' }}>
+
+      <Paper sx={{ width: '80%', overflow: 'hidden', margin: !deleted ? '30px auto' : '110px auto 30px' }}>
         <TableContainer>
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
@@ -171,14 +185,14 @@ const DashboardPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {employees
+              {employees.length !== 0 ? employees
                 .map((employee, index) => {
                   return (
                     <TableRow hover role="checkbox" tabIndex={-1} key={index}>
                       {columns.map((column, idx) => {
                         return (
                           <TableCell key={column.id} align="center">
-                            {column.id === 'action' ? (<Stack direction="row" spacing={2}><Button variant="contained" startIcon={<EditIcon />} onClick={() => handleOpenEditModal(index)} >
+                            {column.id === 'action' ? (<Stack direction="row" spacing={2}><Button sx={{ display: deleted ? "none" : "display" }} variant="contained" startIcon={<EditIcon />} onClick={() => handleOpenEditModal(index)} >
                               Edit
                             </Button><Button variant="contained" startIcon={<DeleteIcon />} onClick={() => handleDelete(employee["_id"])} color="error" >
                                 Delete
@@ -188,7 +202,11 @@ const DashboardPage = () => {
                       })}
                     </TableRow>
                   );
-                })}
+                }) : (
+                <TableRow hover role="checkbox" tabIndex={-1}>
+                  <TableCell align="center" sx={{ width: '100%' }} colSpan={10} >No Data</TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>

@@ -3,19 +3,20 @@ import axios, { AxiosRequestConfig } from 'axios';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
-import { Button, Grid, TextField, Stack } from '@mui/material';
+import { Button, Grid, TextField, Stack, IconButton } from '@mui/material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import moment from 'moment';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref,
+    props,
+    ref,
 ) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
 const style = {
@@ -71,7 +72,7 @@ const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) 
 
     useEffect(() => {
         employee !== undefined ? setFormValues(employee) : setFormValues(defaultValue);
-    }, [employee])
+    }, [employee]);
 
     const handleInputChange = (e: any) => {
         const { name, value } = e.target;
@@ -99,7 +100,7 @@ const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) 
 
     const handleSnakeClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
         if (reason === 'clickaway') {
-        return;
+            return;
         }
         setOpenSnake(false);
     };
@@ -116,14 +117,12 @@ const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) 
             data: testData,
         };
 
-        console.log(config);
-
         event.preventDefault();
         await axios(config).then((res) => {
             if (res.data.success) {
                 setOpenSnake(true);
             }
-            console.log("RES", res);
+            handleCloseModal();
         });
     };
 
@@ -136,9 +135,19 @@ const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) 
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={style}>
-                    <Typography id="modal-modal-title" sx={{ marginBottom: "30px" }} variant="h6" component="h2">
-                        Create New Employee
-                    </Typography>
+                    <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        sx={{ marginBottom: "30px" }}
+                    >
+                        <Typography id="modal-modal-title" variant="h6" component="h2">
+                            Create New Employee
+                        </Typography>
+                        <IconButton aria-label="cancel" onClick={() => handleCloseModal()}>
+                            <HighlightOffIcon />
+                        </IconButton>
+                    </Stack>
                     <form onSubmit={handleSubmit}>
                         <Box sx={{ width: '100%' }}>
                             <Stack spacing={2}>
@@ -248,7 +257,7 @@ const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) 
             </Modal>
             <Snackbar open={openSnake} anchorOrigin={{ vertical: "top", horizontal: "right" }} key={"top" + "right"} autoHideDuration={6000} onClose={handleSnakeClose}>
                 <Alert onClose={handleSnakeClose} severity="success" sx={{ width: '100%' }}>
-                Success, New employee created!
+                    Success, New employee created!
                 </Alert>
             </Snackbar>
         </div>
