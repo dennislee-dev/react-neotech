@@ -86,27 +86,25 @@ const DashboardPage = ({ deleted }: DashboardPropType) => {
   const [openModal, setOpenModal] = useState(false);
 
   useEffect(() => {
-
-    console.log(window.location.href);
-
-    const config: AxiosRequestConfig = !deleted ? {
-      method: "get",
-      url: 'http://142.132.229.249:3000/employees',
-      data: { page: page, limit: rowsPerPage },
-    } : {
-      method: "get",
-      url: 'http://142.132.229.249:3000/employees/deleted',
-      data: { page: page, limit: rowsPerPage },
-    };
-
-    const getEmployees = async (): Promise<void> => {
-      await axios(config).then((res) => {
-        setEmployees(res.data.employees);
-        setTotalEmployeeCount(res.data.count);
-      });
-    }
     getEmployees();
   }, []);
+
+  const config: AxiosRequestConfig = !deleted ? {
+    method: "get",
+    url: 'http://142.132.229.249:3000/employees',
+    data: { page: page, limit: rowsPerPage },
+  } : {
+    method: "get",
+    url: 'http://142.132.229.249:3000/employees/deleted',
+    data: { page: page, limit: rowsPerPage },
+  };
+
+  const getEmployees = async (): Promise<void> => {
+    await axios(config).then((res) => {
+      setEmployees(res.data.employees);
+      setTotalEmployeeCount(res.data.count);
+    });
+  }
 
   const handleChangePage = (event: any, newPage: number) => {
     setPage(newPage);
@@ -125,6 +123,7 @@ const DashboardPage = ({ deleted }: DashboardPropType) => {
   const handleOpenEditModal = (index: number) => {
     setEmployee(employees[index]);
     setOpenModal(true);
+    getEmployees();
   }
 
   const handleCloseModal = () => {
@@ -143,6 +142,7 @@ const DashboardPage = ({ deleted }: DashboardPropType) => {
 
       const softDeleteEmployees = async (): Promise<void> => {
         await axios(config).then((res) => {
+          getEmployees();
           console.log(res);
         });
       }
@@ -189,7 +189,7 @@ const DashboardPage = ({ deleted }: DashboardPropType) => {
                 .map((employee, index) => {
                   return (
                     <TableRow hover role="checkbox" tabIndex={-1} key={index}>
-                      {columns.map((column, idx) => {
+                      {columns.map((column) => {
                         return (
                           <TableCell key={column.id} align="center">
                             {column.id === 'action' ? (<Stack direction="row" spacing={2}><Button sx={{ display: deleted ? "none" : "display" }} variant="contained" startIcon={<EditIcon />} onClick={() => handleOpenEditModal(index)} >
@@ -220,7 +220,7 @@ const DashboardPage = ({ deleted }: DashboardPropType) => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
-      <InsertModal openModal={openModal} employee={employee} handleCloseModal={() => handleCloseModal()} />
+      <InsertModal openModal={openModal} employee={employee} getEmployees={() => getEmployees()} handleCloseModal={() => handleCloseModal()} />
     </Box>
   );
 };

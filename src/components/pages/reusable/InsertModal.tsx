@@ -34,24 +34,11 @@ const style = {
 type ModalPropsType = {
     openModal: boolean,
     employee: any,
+    getEmployees: any,
     handleCloseModal: any
 }
 
-const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) => {
-
-    const testData = {
-        dateOfBirth: "2022-06-14T22:00:00.000Z",
-        dateOfEmployment: "2022-06-14T22:00:00.000Z",
-        email: "fueqhsa@gmail.com",
-        homeAddress: {
-            addressLine1: "address1",
-            addressLine2: "address2",
-            city: "town1",
-            ZIPCode: "02108",
-        },
-        name: "test 1",
-        phoneNumber: "+19292056099",
-    };
+const InsertModal = ({ openModal, employee, getEmployees, handleCloseModal }: ModalPropsType) => {
 
     const defaultValue = {
         name: "",
@@ -114,13 +101,14 @@ const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) 
         } : {
             method: "post",
             url: 'http://142.132.229.249:3000/employees',
-            data: testData,
+            data: formValues,
         };
 
         event.preventDefault();
         await axios(config).then((res) => {
-            if (res.data.success) {
+            if (res.status == 201) {
                 setOpenSnake(true);
+                getEmployees();
             }
             handleCloseModal();
         });
@@ -141,9 +129,7 @@ const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) 
                         alignItems="center"
                         sx={{ marginBottom: "30px" }}
                     >
-                        <Typography id="modal-modal-title" variant="h6" component="h2">
-                            Create New Employee
-                        </Typography>
+                        {employee !== undefined ? (<Typography id="modal-modal-title" variant="h6" component="h2">Edit Employee</Typography>) : (<Typography id="modal-modal-title" variant="h6" component="h2">Create New Employee</Typography>)}
                         <IconButton aria-label="cancel" onClick={() => handleCloseModal()}>
                             <HighlightOffIcon />
                         </IconButton>
@@ -151,12 +137,13 @@ const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) 
                     <form onSubmit={handleSubmit}>
                         <Box sx={{ width: '100%' }}>
                             <Stack spacing={2}>
-                                <Grid sx={{ textAlign: "center" }} item>
+                            <Grid sx={{ textAlign: "center" }} item>
                                     <TextField
                                         id="name-input"
                                         name="name"
                                         label="Name"
                                         type="text"
+                                        sx={{ width: "80%" }}
                                         value={formValues.name}
                                         onChange={handleInputChange}
                                     />
@@ -167,6 +154,7 @@ const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) 
                                         name="email"
                                         label="Email"
                                         type="email"
+                                        sx={{ width: "80%" }}
                                         value={formValues.email}
                                         onChange={handleInputChange}
                                     />
@@ -177,6 +165,7 @@ const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) 
                                         name="phoneNumber"
                                         label="Phone Number"
                                         type="text"
+                                        sx={{ width: "80%" }}
                                         value={formValues.phoneNumber}
                                         onChange={handleInputChange}
                                     />
@@ -187,6 +176,7 @@ const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) 
                                         name="city"
                                         label="City"
                                         type="text"
+                                        sx={{ width: "80%" }}
                                         value={formValues.homeAddress.city}
                                         onChange={handleInputChange}
                                     />
@@ -197,6 +187,7 @@ const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) 
                                         name="zipCode"
                                         label="ZIPCode"
                                         type="text"
+                                        sx={{ width: "80%" }}
                                         value={formValues.homeAddress.ZIPCode}
                                         onChange={handleInputChange}
                                     />
@@ -207,6 +198,7 @@ const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) 
                                         name="addressLine1"
                                         label="Address Line 1"
                                         type="text"
+                                        sx={{ width: "80%" }}
                                         value={formValues.homeAddress.addressLine1}
                                         onChange={handleInputChange}
                                     />
@@ -217,6 +209,7 @@ const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) 
                                         name="addressLine2"
                                         label="Address Line 2"
                                         type="text"
+                                        sx={{ width: "80%" }}
                                         value={formValues.homeAddress.addressLine2}
                                         onChange={handleInputChange}
                                     />
@@ -229,7 +222,7 @@ const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) 
                                             onChange={(newValue) => {
                                                 handleDatePicker("dateOfEmployment", newValue);
                                             }}
-                                            renderInput={(params) => <TextField {...params} />}
+                                            renderInput={(params) => <TextField sx={{ width: "80%" }} {...params} />}
                                         />
                                     </LocalizationProvider>
                                 </Grid>
@@ -241,12 +234,12 @@ const InsertModal = ({ openModal, employee, handleCloseModal }: ModalPropsType) 
                                             onChange={(newValue) => {
                                                 handleDatePicker("dateOfBirth", newValue);
                                             }}
-                                            renderInput={(params) => <TextField {...params} />}
+                                            renderInput={(params) => <TextField sx={{ width: "80%" }} {...params} />}
                                         />
                                     </LocalizationProvider>
                                 </Grid>
                                 <Grid sx={{ textAlign: "center" }} item>
-                                    <Button variant="contained" color="primary" type="submit">
+                                <Button variant="contained" color="primary" type="submit">
                                         Submit
                                     </Button>
                                 </Grid>
